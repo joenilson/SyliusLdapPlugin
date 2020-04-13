@@ -137,20 +137,21 @@ final class SymfonyToSyliusShopUserProviderProxy implements SyliusUserProviderIn
         $syliusUser = $this->container->get('sylius.repository.shop_user')->findOneBy(['username' => $symfonyUser->getUsername()]);
         if(!$syliusUser) {
             /** @var ShopUserInterface $syliusUser */
-            $syliusUser = $this->shopUserFactory->createNew();
-            $syliusUser->setCustomer($customer);
-            $syliusUser->setEmail($ldapAttributes['email']);
-            $syliusUser->setUsername($symfonyUser->getUsername());
-            $syliusUser->setLocked($locked);
-            $syliusUser->setEnabled(!$locked);
-            $syliusUser->setPlainPassword('ldap');
-            $syliusUser->setExpiresAt($ldapAttributes['expires_at']);
-            $syliusUser->setLastLogin($this->attributeFetcher->toDateTime($ldapAttributes['last_login']));
-            $syliusUser->setVerifiedAt($this->attributeFetcher->toDateTime($ldapAttributes['verified_at']));
-            $syliusUser->setEmailCanonical($ldapAttributes['email_canonical']);
-            $syliusUser->setUsernameCanonical($ldapAttributes['username_canonical']);
-            $syliusUser->setCredentialsExpireAt($this->attributeFetcher->toDateTime($ldapAttributes['credentials_expire_at']));
-            $this->convertSymfonyToSyliusUser($symfonyUser);
+            $newSyliusUser = $this->container->get('sylius.factory.shop_user')->createNew();
+            $newSyliusUser->setCustomer($customer);
+            $newSyliusUser->setEmail($ldapAttributes['email']);
+            $newSyliusUser->setUsername($symfonyUser->getUsername());
+            $newSyliusUser->setLocked($locked);
+            $newSyliusUser->setEnabled(!$locked);
+            $newSyliusUser->setPlainPassword('ldap');
+            $newSyliusUser->setExpiresAt($ldapAttributes['expires_at']);
+            $newSyliusUser->setLastLogin($this->attributeFetcher->toDateTime($ldapAttributes['last_login']));
+            $newSyliusUser->setVerifiedAt($this->attributeFetcher->toDateTime($ldapAttributes['verified_at']));
+            $newSyliusUser->setEmailCanonical($ldapAttributes['email_canonical']);
+            $newSyliusUser->setUsernameCanonical($ldapAttributes['username_canonical']);
+            $newSyliusUser->setCredentialsExpireAt($this->attributeFetcher->toDateTime($ldapAttributes['credentials_expire_at']));
+            $this->container->get('sylius.repository.shop_user')->add($newSyliusUser);
+            $syliusUser = $this->container->get('sylius.repository.shop_user')->findOneBy(['username' => $symfonyUser->getUsername()]);
         }
         return $syliusUser;
     }
@@ -158,6 +159,7 @@ final class SymfonyToSyliusShopUserProviderProxy implements SyliusUserProviderIn
     private function createCustomerUser($ldapAttributes): CustomerInterface
     {
         $customer = $this->container->get('sylius.repository.customer')->findOneBy(['email' => $ldapAttributes['email']]);
+        
         if(!$customer) {
         /** @var CustomerInterface $newCustomer */
             $newCustomer = $this->container->get('sylius.factory.customer')->createNew();
@@ -165,7 +167,7 @@ final class SymfonyToSyliusShopUserProviderProxy implements SyliusUserProviderIn
             $newCustomer->setFirstName($ldapAttributes['first_name']);
             $newCustomer->setLastName($ldapAttributes['last_name']);
             $this->container->get('sylius.repository.customer')->add($newCustomer);
-            $this->createCustomerUser($ldapAttributes);
+            $customer = $this->container->get('sylius.repository.customer')->findOneBy(['email' => $ldapAttributes['email']]);
         }
         return $customer;
     }
