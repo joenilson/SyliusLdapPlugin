@@ -37,6 +37,30 @@
             <argument type="service" id="sylius_ldap.ldap.ldap_attribute_fetcher" />
             <argument type="service" id="sylius.factory.admin_user" />
         </service>
+        
+        <service
+            id="sylius_ldap.user_provider.ldap_as_shop_user"
+            class="Brille24\SyliusLdapPlugin\User\SymfonyToSyliusShopUserProviderProxy"
+        >
+            <argument type="service">
+                <service class="Symfony\Component\Security\Core\User\LdapUserProvider">
+                    <argument type="service" id="Symfony\Component\Ldap\Ldap" />
+                    <argument>%env(LDAP_USER_QUERY_DN)%</argument>
+                    <argument>%env(LDAP_LOOKUP_DN)%</argument>
+                    <argument>%env(LDAP_PASSWORD)%</argument>
+                    <argument type="collection">
+                        <argument>ROLE_USER</argument>
+                    </argument>
+                    <argument>%env(LDAP_QUERY_PARAMETER)%</argument>
+                </service>
+            </argument>
+            <argument type="service" id="sylius.shop_user_provider.name_based" />
+            <argument type="service" id="property_accessor" />
+            <argument type="service" id="sylius_ldap.ldap.ldap_attribute_fetcher" />
+            <argument type="service" id="sylius.factory.customer" />
+            <argument type="service" id="sylius.factory.shop_user" />
+            <argument type="service" id="service_container" />
+        </service>
 
         <service id="Symfony\Component\Ldap\Ldap">
             <argument type="service" id="Symfony\Component\Ldap\Adapter\ExtLdap\Adapter"/>

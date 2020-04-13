@@ -12,6 +12,8 @@ security:
             id: sylius.shop_user_provider.email_or_name_based
         brille24_ldap_admin_user_provider:
             id: sylius_ldap.user_provider.ldap_as_admin_user
+        brille24_ldap_shop_user_provider:
+            id: sylius_ldap.user_provider.ldap_as_shop_user
     encoders:
         Sylius\Component\User\Model\UserInterface: sha512
     firewalls:
@@ -60,11 +62,16 @@ security:
             switch_user: { role: ROLE_ALLOWED_TO_SWITCH }
             context: shop
             pattern: "%sylius.security.shop_regex%"
-            provider: sylius_shop_user_provider
-            form_login:
+#            provider: sylius_shop_user_provider
+            provider: brille24_ldap_shop_user_provider
+            form_login_ldap:
                 success_handler: sylius.authentication.success_handler
                 failure_handler: sylius.authentication.failure_handler
-                provider: sylius_shop_user_provider
+#                provider: sylius_shop_user_provider
+                provider: brille24_ldap_shop_user_provider
+                service: Symfony\Component\Ldap\Ldap
+                dn_string: "%env(LDAP_USER_QUERY_DN)%"
+                query_string: "%env(LDAP_QUERY_STRING)%"
                 login_path: sylius_shop_login
                 check_path: sylius_shop_login_check
                 failure_path: sylius_shop_login
