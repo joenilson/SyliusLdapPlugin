@@ -143,7 +143,7 @@ final class SymfonyToSyliusShopUserProviderProxy implements SyliusUserProviderIn
             $newSyliusUser->setUsername($symfonyUser->getUsername());
             $newSyliusUser->setLocked($locked);
             $newSyliusUser->setEnabled(!$locked);
-            $newSyliusUser->setPlainPassword('ldap');
+            $newSyliusUser->setPassword('');
             $newSyliusUser->setExpiresAt($ldapAttributes['expires_at']);
             $newSyliusUser->setLastLogin($this->attributeFetcher->toDateTime($ldapAttributes['last_login']));
             $newSyliusUser->setVerifiedAt($this->attributeFetcher->toDateTime($ldapAttributes['verified_at']));
